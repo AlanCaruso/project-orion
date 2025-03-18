@@ -17,10 +17,9 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
     private bool isJumping = false; // Solo se activa cuando el salto empieza
     private bool isJumpingIdle = false; // Para manejar el salto sin moverse
-    private bool isRunning = false; // Para controlar el estado de carrera
     private float coyoteTimeCounter;
     private float coyoteTime = 0.2f; // Tiempo de gracia para saltos
-    private float timeInAir = 0f;  // Para controlar cuánto tiempo está en el aire
+    private float timeInAir = 0f;  // Para controlar cuanto tiempo esta en el aire
 
     void Start()
     {
@@ -30,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Verificar si el personaje está tocando el suelo
+        // Verificar si el personaje esta tocando el suelo
         isGrounded = controller.isGrounded;
 
         if (isGrounded)
@@ -49,7 +48,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            // Si está en el aire, aplicar la gravedad y aumentar el tiempo en el aire
+            // Si esta en el aire, aplicar la gravedad y aumentar el tiempo en el aire
             verticalVelocity -= gravity * Time.deltaTime;
             timeInAir += Time.deltaTime;
         }
@@ -58,13 +57,13 @@ public class PlayerMovement : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        // Crear un vector de dirección con base en la entrada del jugador
+        // Crear un vector de direccion con base en la entrada del jugador
         movementDirection = new Vector3(horizontal, 0, vertical).normalized;
 
-        // Si el jugador está intentando moverse
+        // Si el jugador esta intentando moverse
         if (movementDirection.magnitude >= 0.1f)
         {
-            // Calcular el ángulo de rotación basado en la dirección de la cámara
+            // Calcular el angulo de rotacion basado en la direccion de la camara
             float targetAngle = Mathf.Atan2(movementDirection.x, movementDirection.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
             float smoothedAngle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, rotationSpeed * Time.deltaTime);
             transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
@@ -73,32 +72,21 @@ public class PlayerMovement : MonoBehaviour
             Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward * speed;
             controller.Move(moveDirection * Time.deltaTime);
 
-            anim.SetBool("IsWalking", true);
-            if (movementDirection.magnitude > 0.5f)  // Si la velocidad es mayor a un umbral, activar sprint
-            {
-                anim.SetBool("IsSprinting", true);
-                isRunning = true;
-            }
-            else
-            {
-                anim.SetBool("IsSprinting", false);
-                isRunning = false;
-            }
+            anim.SetBool("IsRunning", true);
+
         }
         else
         {
-            anim.SetBool("IsWalking", false);
-            anim.SetBool("IsSprinting", false);
-            isRunning = false;
+            anim.SetBool("IsRunning", false);
         }
 
         // Manejo del salto en idle
         if (!isGrounded && movementDirection.magnitude == 0f && isJumping)
         {
-            anim.SetBool("IsJumpingIdle", true); // Activar animación de salto sin moverse
+            anim.SetBool("IsJumpingIdle", true); // Activar animacion de salto sin moverse
             isJumpingIdle = true;
         }
-        // Si el jugador estaba en un salto idle pero empieza a moverse en el aire, cambiar a la animación de salto normal
+        // Si el jugador estaba en un salto idle pero empieza a moverse en el aire, cambiar a la animacion de salto normal
         else if (movementDirection.magnitude > 0f && isJumpingIdle)
         {
             anim.SetBool("IsJumpingIdle", false);
@@ -126,14 +114,14 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter = 0; // Evitar saltos infinitos
         }
 
-        // Si el personaje aterriza y no está moviéndose, reiniciar el estado de salto
+        // Si el personaje aterriza y no este moviendose, reiniciar el estado de salto
         if (isGrounded && !isJumping && !isJumpingIdle && movementDirection.magnitude == 0f)
         {
             anim.SetBool("IsJumping", false);
             anim.SetBool("IsJumpingIdle", false);
         }
 
-        // Si el jugador estaba saltando y ahora está corriendo, dejar de estar en el estado de salto
+        // Si el jugador estaba saltando y ahora esta corriendo, dejar de estar en el estado de salto
         if (isGrounded && movementDirection.magnitude > 0f && !isJumping && !isJumpingIdle)
         {
             anim.SetBool("IsJumping", false);
