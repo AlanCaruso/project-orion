@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1] - Prototype (2025-03-18)
+
+### Added Features
+
+- Fixed delay in player movement stopping when using the keyboard by replacing `Input.GetAxis` with `Input.GetAxisRaw`.
+- Added 3D island elements to test player movement.
+
 ## [0.1.0] - Prototype (2025-03-16)
 
 ### Added Features
