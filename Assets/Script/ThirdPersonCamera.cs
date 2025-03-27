@@ -15,6 +15,24 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public float joystickDeadZone = 0.1f;  // Rango mínimo para que el joystick mueva la cámara
 
+    // Zoom variables
+    public float minZoom = 3f;  // Distancia mínima de la cámara
+    public float maxZoom = 10f; // Distancia máxima de la cámara
+    public float zoomSpeed = 2f;  // Velocidad del zoom
+    public float zoomSmoothTime = 0.1f;  // Tiempo de suavizado del zoom
+
+    private float currentZoom; // Distancia inicial
+    private float targetZoom;
+    private float zoomVelocity;
+
+    void Start()
+    {
+        targetZoom = maxZoom; // Inicia con el zoom máximo
+        currentZoom = 10f; // Inicia con un valor predefinido
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+    }
     void Update()
     {
         if (player == null) return;
@@ -54,9 +72,24 @@ public class ThirdPersonCamera : MonoBehaviour
         rotationY -= verticalInput * mouseSensitivity * Time.deltaTime;  // Sensibilidad del ratón
         rotationY = Mathf.Clamp(rotationY, minY, maxY);  // Limitar la rotación vertical
 
-        // Calcular la rotación final de la cámara
+
+        // Manejo del zoom con transición suave
+        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+        if (scrollInput != 0)
+        {
+            targetZoom -= scrollInput * zoomSpeed;
+            targetZoom = Mathf.Clamp(targetZoom, minZoom, maxZoom);
+        }
+        currentZoom = Mathf.SmoothDamp(currentZoom, targetZoom, ref zoomVelocity, zoomSmoothTime);
+
+        // Ajustar altura cuando el zoom es mínimo
+        float heightOffset = Mathf.Lerp(1.5f, 0f, (currentZoom - minZoom) / (maxZoom - minZoom));
+
+        // Calcular posición final de la cámara
         Quaternion rotation = Quaternion.Euler(rotationY, rotationX, 0f);
-        transform.position = player.position - rotation * Vector3.forward * 7f;  // Colocar la cámara detrás del jugador
-        transform.LookAt(player.position);  // Mirar hacia el jugador
+        Vector3 cameraOffset = new Vector3(0, heightOffset, -currentZoom);
+        transform.position = player.position + rotation * cameraOffset;
+
+        transform.LookAt(player.position + Vector3.up * 1.5f); // Ajuste de altura para ver todo el cuerpo
     }
 }
